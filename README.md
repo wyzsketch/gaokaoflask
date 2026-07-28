@@ -6,3 +6,4 @@
 4，运行 flask-demo.py 
 5，打开html入口文件夹，打开login.html 
 6，目前为demo版，不代表最终结果
+7，应当把html文件放在一个文件夹，且要和py文件必须在一个父目录
