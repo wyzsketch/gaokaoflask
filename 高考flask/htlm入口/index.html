@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户中心门户</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        .box {
+            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top:8px;
+        }
+        .menu-item{
+            border:1px solid #ccc;
+            padding:16px;
+            border-radius:6px;
+            margin:10px 0;
+            cursor:pointer;
+        }
+        .menu-item:hover{
+            background:#f0f7ff;
+        }
+        .tip{
+            color:red;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginPanel" class="box hidden">
+    <h2>账号登录</h2>
+    <input type="text" id="username" placeholder="用户名">
+    <input type="password" id="password" placeholder="密码">
+    <p class="tip" id="loginTip"></p>
+    <button onclick="login()">登录</button>
+</div>
+
+<div id="userCenterPanel" class="box">
+    <h2>欢迎进入用户中心</h2>
+    <p>当前账号：<span id="showUsername"></span></p>
+    <hr>
+    <h3>功能菜单</h3>
+    <div id="menuList"></div>
+    <hr>
+    <button style="background:#999" onclick="logout()">退出登录</button>
+</div>
+
+<script>
+    const BASE_URL = "http://127.0.0.1:5000";
+    window.onload = function(){
+        checkLoginState();
+    }
+    function checkLoginState(){
+        const token = localStorage.getItem("token");
+        if(token && token.length > 15){
+            showUserCenter();
+        }else{
+            localStorage.removeItem("token");
+            localStorage.removeItem("loginName");
+            window.location.href="login.html";
+        }
+    }
+    function showUserCenter(){
+        document.getElementById("loginPanel").classList.add("hidden");
+        document.getElementById("userCenterPanel").classList.remove("hidden");
+        loadMenu();
+        loadUserInfo();
+    }
+    async function login(){
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const tipDom = document.getElementById("loginTip");
+        tipDom.innerText = "";
+        const res = await fetch(`${BASE_URL}/api/login`,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({username,password})
+        })
+        const data = await res.json();
+        if(data.code === 200){
+            localStorage.setItem("token", data.data.token);
+            localStorage.setItem("loginName",username);
+            showUserCenter();
+        }else{
+            tipDom.innerText = data.msg;
+        }
+    }
+    async function loadMenu(){
+        const token = localStorage.getItem("token");
+        try{
+            const res = await fetch(`${BASE_URL}/api/user/menu`,{
+                method:"GET",
+                headers:{
+                    "Authorization":`Bearer ${token}`
+                }
+            })
+            if(res.status === 401 || res.status === 422){
+                alert("登录失效，请重新登录");
+                localStorage.clear();
+                window.location.href="login.html";
+                return;
+            }
+            const data = await res.json();
+            const menuBox = document.getElementById("menuList");
+            menuBox.innerHTML = "";
+            if(data.code === 200){
+                data.data.forEach(item=>{
+                    let div = document.createElement("div");
+                    div.className = "menu-item";
+                    div.innerText = item.menu_name;
+                    div.onclick = function(){
+                        let targetPage = "";
+                        if(item.route === "/user/profile") targetPage = "profile.html";
+                        if(item.route === "/user/edit_nickname") targetPage = "edit_nickname.html";
+                        if(item.route === "/user/update_pwd") targetPage = "update_pwd.html";
+                        if(item.route === "/gaokao/search") targetPage = "gaokao.html";
+                        if(item.route === "/admin/user_list") targetPage = "admin_user.html";
+                        if(targetPage) window.location.href = targetPage;
+                    }
+                    menuBox.appendChild(div);
+                })
+            }
+        }catch(err){
+            document.getElementById("menuList").innerHTML = `<div style="color:red">后端未启动</div>`;
+        }
+    }
+    async function loadUserInfo(){
+        const token = localStorage.getItem("token");
+        try{
+            const res = await fetch(`${BASE_URL}/api/userinfo`,{
+                headers:{
+                    "Authorization":`Bearer ${token}`
+                }
+            })
+            if(res.status === 401 || res.status === 422){
+                alert("登录失效");
+                localStorage.clear();
+                window.location.href="login.html";
+                return;
+            }
+            const data = await res.json();
+            if(data.code === 200){
+                document.getElementById("showUsername").innerText = data.data.username;
+            }
+        }catch(err){
+            document.getElementById("showUsername").innerText = "连接失败";
+        }
+    }
+    function logout(){
+        localStorage.clear();
+        window.location.href="login.html";
+    }
+</script>
+</body>
+</html>

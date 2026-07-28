@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>系统登录</title>
+    <style>
+        body {
+            max-width: 520px;
+            margin:80px auto;
+            padding: 0 20px;
+            font-family: "Microsoft Yahei",sans-serif;
+        }
+        .box{
+            border:1px solid #ddd;
+            padding:30px;
+            border-radius:10px;
+        }
+        .hide{
+            display:none;
+        }
+        input{
+            width:100%;
+            padding:10px;
+            margin:8px 0;
+            font-size:16px;
+        }
+        button{
+            width:100%;
+            padding:12px;
+            border:none;
+            border-radius:6px;
+            font-size:16px;
+            cursor:pointer;
+            margin-top:6px;
+        }
+        .blue{background:#2563eb;color:#fff;}
+        .gray{background:#868686;color:#fff;}
+        .purple{background:#622ce8;color:#fff;}
+        .tip{color:red;}
+    </style>
+</head>
+<body>
+<div class="box">
+    <!-- 普通用户登录区域 -->
+    <div id="userLoginArea">
+        <h2>普通用户登录</h2>
+        <input type="text" id="username" placeholder="用户名">
+        <input type="password" id="password" placeholder="密码">
+        <p class="tip" id="userTip"></p>
+        <button class="blue" onclick="userLogin()">登录</button>
+        <button class="gray" onclick="goRegister()">没有账号？前往注册</button>
+        <hr style="margin:20px 0;">
+        <button class="purple" onclick="showAdminLogin()">管理员专属登录入口</button>
+    </div>
+
+    <!-- 管理员登录区域 默认隐藏 -->
+    <div id="adminLoginArea" class="hide">
+        <h2>管理员登录</h2>
+        <input type="text" id="adminUser" placeholder="管理员账号">
+        <input type="password" id="adminPwd" placeholder="密码">
+        <p class="tip" id="adminTip"></p>
+        <button class="purple" onclick="adminLogin()">管理员登录</button>
+        <button class="gray" onclick="backUserLogin()">返回普通用户登录</button>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = "http://127.0.0.1:5000";
+
+    // 切换管理员登录面板
+    function showAdminLogin(){
+        document.getElementById("userLoginArea").classList.add("hide");
+        document.getElementById("adminLoginArea").classList.remove("hide");
+    }
+    // 返回普通登录面板
+    function backUserLogin(){
+        document.getElementById("adminLoginArea").classList.add("hide");
+        document.getElementById("userLoginArea").classList.remove("hide");
+    }
+    // 跳转注册页面
+    function goRegister(){
+        window.location.href="registerdemo.html";
+    }
+
+    // =========普通用户登录=========
+    async function userLogin(){
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const tipDom = document.getElementById("userTip");
+        tipDom.innerText = "";
+        fetch(`${BASE_URL}/api/login`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({username,password})
+        })
+        .then(res=>res.json())
+        .then(data=>{
+            if(data.code === 200){
+                localStorage.setItem("token", data.data.token);
+                localStorage.setItem("loginName", username);
+                window.location.href = "index.html";
+            }else{
+                tipDom.innerText = data.msg;
+            }
+        })
+        .catch(()=>{
+            tipDom.innerText = "无法连接后端，请启动Flask";
+        })
+    }
+
+    // =========管理员登录，登录成功直接进入用户管理页面=========
+    async function adminLogin(){
+        const username = document.getElementById("adminUser").value;
+        const password = document.getElementById("adminPwd").value;
+        const tipDom = document.getElementById("adminTip");
+        tipDom.innerText = "";
+        fetch(`${BASE_URL}/api/login`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({username,password})
+        })
+        .then(res=>res.json())
+        .then(data=>{
+            if(data.code === 200){
+                localStorage.setItem("token", data.data.token);
+                localStorage.setItem("loginName", username);
+                // 管理员登录成功直接跳转管理员页面
+                window.location.href = "admin_user.html";
+            }else{
+                tipDom.innerText = data.msg;
+            }
+        })
+        .catch(()=>{
+            tipDom.innerText = "无法连接后端，请启动Flask";
+        })
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>修改昵称</title>
+    <style>
+        body {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 0 20px;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        .box{
+            border:1px solid #ddd;
+            padding:30px;
+            border-radius:10px;
+        }
+        input{
+            width:100%;
+            padding:12px;
+            font-size:16px;
+            margin:10px 0;
+        }
+        button{
+            width:100%;
+            padding:12px;
+            font-size:16px;
+            margin:6px 0;
+            cursor:pointer;
+        }
+        .tip{
+            color:red;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>修改昵称</h2>
+    <input type="text" id="nick_input" placeholder="输入新昵称">
+    <p class="tip" id="msg"></p>
+    <button onclick="saveNick()">保存修改</button>
+    <button onclick="backIndex()">返回用户中心</button>
+</div>
+
+<script>
+    const BASE_URL = "http://127.0.0.1:5000";
+    const token = localStorage.getItem("token");
+    if(!token) {
+        alert("请登录");
+        location.href="login.html";
+    }
+    async function saveNick(){
+        const tip = document.getElementById("msg");
+        const newnick = document.getElementById("nick_input").value;
+        const res = await fetch(`${BASE_URL}/api/user/edit_nickname`,{
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":`Bearer ${token}`
+            },
+            body:JSON.stringify({nickname:newnick})
+        })
+        const data = await res.json();
+        if(data.code===200){
+            alert("修改成功！");
+            backIndex();
+        }else{
+            tip.innerText=data.msg;
+        }
+    }
+    function backIndex(){
+        window.location.href="index.html";
+    }
+</script>
+</body>
+</html>

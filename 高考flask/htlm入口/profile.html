@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>个人资料</title>
+    <style>
+        body {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 0 20px;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        .box{
+            border:1px solid #ddd;
+            padding:30px;
+            border-radius:10px;
+        }
+        .row{
+            margin:16px 0;
+            font-size:18px;
+        }
+        button{
+            padding:10px 20px;
+            font-size:16px;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>个人资料</h2>
+    <div class="row">用户名：<span id="u_name"></span></div>
+    <div class="row">昵称：<span id="u_nick"></span></div>
+    <div class="row">身份：<span id="u_role"></span></div>
+    <hr>
+    <button onclick="backIndex()">返回用户中心</button>
+</div>
+
+<script>
+    const BASE_URL = "http://127.0.0.1:5000";
+    const token = localStorage.getItem("token");
+    if(!token || token.length <15){
+        alert("请先登录");
+        window.location.href="login.html";
+    }
+    window.onload = loadInfo();
+    async function loadInfo(){
+        const res = await fetch(`${BASE_URL}/api/userinfo`,{
+            headers:{
+                "Authorization":`Bearer ${token}`
+            }
+        })
+        if(res.status ===401 || res.status ===422){
+            alert("登录失效，请重新登录");
+            localStorage.clear();
+            window.location.href="login.html";
+            return;
+        }
+        const data = await res.json();
+        document.getElementById("u_name").innerText = data.data.username;
+        document.getElementById("u_nick").innerText = data.data.nickname;
+        document.getElementById("u_role").innerText = data.data.role === "admin" ? "管理员" : "普通用户";
+    }
+    function backIndex(){
+        window.location.href="index.html";
+    }
+</script>
+</body>
+</html>
