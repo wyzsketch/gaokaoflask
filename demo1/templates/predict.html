@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}智能预测 - 高考位次智能预测系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-4">📊 高考位次智能预测</h3>
+    </div>
+</div>
+
+<!-- 查询条件区 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <!-- 学校搜索 -->
+            <div class="col-md-3">
+                <label class="form-label">学校名称</label>
+                <input type="text" id="schoolInput" class="form-control" placeholder="输入学校名称搜索">
+                <div id="schoolList" class="search-result-list" style="display:none;"></div>
+            </div>
+
+            <!-- 专业搜索 -->
+            <div class="col-md-3">
+                <label class="form-label">专业名称</label>
+                <input type="text" id="majorInput" class="form-control" placeholder="输入专业名称搜索" disabled>
+                <div id="majorList" class="search-result-list" style="display:none;"></div>
+            </div>
+
+            <!-- 选科 -->
+            <div class="col-md-2">
+                <label class="form-label">选科类型</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="subjectType" id="artsRadio" value="0">
+                        <label class="form-check-label" for="artsRadio">文科</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="subjectType" id="sciencesRadio" value="1" checked>
+                        <label class="form-check-label" for="sciencesRadio">理科</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="col-md-4">
+                <button id="searchSchoolBtn" class="btn btn-primary me-2">查询学校</button>
+                <button id="searchMajorBtn" class="btn btn-success" disabled>查询专业</button>
+            </div>
+        </div>
+
+        <!-- 已选学校/专业显示 -->
+        <div class="row mt-3" id="selectedInfo" style="display:none;">
+            <div class="col-12">
+                <div class="alert alert-info mb-0 py-2">
+                    <span id="selectedSchoolText"></span>
+                    <span class="mx-2">|</span>
+                    <span id="selectedMajorText"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修正参数区 -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h6 class="mb-0">⚙️ 预测修正参数</h6>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-2">
+                <label class="form-label">中修正</label>
+                <input type="number" id="adjMideInput" class="form-control" value="0" placeholder="中位修正">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">上修正</label>
+                <input type="number" id="adjUpInput" class="form-control" value="0" placeholder="上限修正">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">下修正</label>
+                <input type="number" id="adjDownInput" class="form-control" value="0" placeholder="下限修正">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">第三方预测</label>
+                <input type="number" id="jhPredictInput" class="form-control" value="0" placeholder="第三方分数">
+            </div>
+            <div class="col-md-4 text-end">
+                <button id="predictBtn" class="btn btn-warning me-2" disabled>🔄 重新预测</button>
+                <button id="saveBtn" class="btn btn-success" disabled>💾 保存存档</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 预测结果区 -->
+<div class="card mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">🎯 预测结果</h6>
+        <span id="predictResultText" class="text-danger fw-bold">---</span>
+    </div>
+    <div class="card-body">
+        <div id="chartContainer" style="width: 100%; height: 500px;"></div>
+    </div>
+</div>
+
+<!-- 详细数据区 -->
+<div class="card" id="detailCard" style="display:none;">
+    <div class="card-header bg-light">
+        <h6 class="mb-0">📋 详细数据</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr><th colspan="2">历年录取数据</th></tr>
+                    </thead>
+                    <tbody id="historyTableBody"></tbody>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr><th colspan="2">2026预测结果</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>中位预测</td><td id="predictMidCell">-</td></tr>
+                        <tr><td>上限预测</td><td id="predictUpCell">-</td></tr>
+                        <tr><td>下限预测</td><td id="predictDownCell">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr><th colspan="2">预测说明</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>预测算法</td><td>线性回归</td></tr>
+                        <tr><td>置信区间</td><td>最大偏差×1.1</td></tr>
+                        <tr><td>修正方式</td><td>手动叠加</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+{% endblock %}

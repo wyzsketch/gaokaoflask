@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 高考位次智能预测系统{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="hero-section text-center py-5">
+            <h1 class="display-4 mb-4">🎯 高考位次智能预测系统</h1>
+            <p class="lead text-muted mb-5">基于历年录取数据与线性回归算法，精准预测2026年高考院校专业录取位次</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">📊</div>
+                    <h5>大数据分析</h5>
+                    <p class="text-muted">整合历年院校专业录取数据，多维度分析趋势变化</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">🤖</div>
+                    <h5>AI智能预测</h5>
+                    <p class="text-muted">基于线性回归算法，结合手动修正，精准预测录取位次</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">📈</div>
+                    <h5>可视化图表</h5>
+                    <p class="text-muted">ECharts动态图表展示历年位次与预测区间，直观清晰</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/predict" class="btn btn-primary btn-lg px-5">
+                开始智能预测 →
+            </a>
+        </div>
+
+        <div class="mt-5">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">📋 使用说明</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>输入学校名称关键词，搜索并选择目标院校</li>
+                        <li>选择文科/理科，输入专业名称搜索目标专业</li>
+                        <li>查看历年录取位次趋势图，系统自动生成预测</li>
+                        <li>可手动调整修正参数，优化预测结果</li>
+                        <li>保存预测记录，方便后续查看与对比</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    .hero-section h1 {
+        color: white;
+    }
+    .hero-section .lead {
+        color: rgba(255,255,255,0.9);
+    }
+    .feature-card {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}

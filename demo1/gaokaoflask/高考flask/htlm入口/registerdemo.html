@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>账号注册</title>
+    <style>
+        body {
+            max-width: 500px;
+            margin: 80px auto;
+            padding: 0 20px;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        .box {
+            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .reg-btn {
+            background-color: #2563eb;
+            color: white;
+        }
+        .back-login-btn {
+            background-color: #999;
+            color: white;
+        }
+        .tip {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h3>新用户注册</h3>
+    <input type="text" id="reg_user" placeholder="请输入用户名">
+    <input type="password" id="reg_pwd" placeholder="请输入密码">
+    <p class="tip" id="reg_tip"></p>
+    <button class="reg-btn" onclick="register()">立即注册</button>
+    <button class="back-login-btn" onclick="goLogin()">已有账号？返回登录</button>
+</div>
+
+<script>
+    const baseUrl = "http://127.0.0.1:5000";
+    // 返回登录页面
+    function goLogin() {
+        location.href = "login.html";
+    }
+
+    async function register() {
+        const tipDom = document.getElementById("reg_tip");
+        tipDom.innerText = "";
+        let username = document.getElementById("reg_user").value;
+        let password = document.getElementById("reg_pwd").value;
+
+        if (!username || !password) {
+            tipDom.innerText = "用户名和密码不能为空";
+            return;
+        }
+
+        let res = await fetch(`${baseUrl}/api/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
+        })
+        let data = await res.json();
+        alert(data.msg);
+        // 注册成功自动跳转登录页
+        if (data.code === 200) {
+            location.href = "login.html";
+        } else {
+            tipDom.innerText = data.msg;
+        }
+    }
+</script>
+</body>
+</html>
